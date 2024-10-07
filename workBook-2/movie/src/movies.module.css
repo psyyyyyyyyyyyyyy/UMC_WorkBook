@@ -1,0 +1,15 @@
+.imageContainer {
+    display: inline;
+}
+
+.image {
+    width: 10%;
+    height: auto;
+    border-radius: 12px;
+    padding: 1%;
+    transition: filter 0.3s ease;
+}
+
+.image:hover {
+    filter: brightness(50%);
+}
