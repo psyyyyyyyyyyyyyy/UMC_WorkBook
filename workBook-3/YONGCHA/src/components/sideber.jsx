@@ -48,10 +48,12 @@ const sidebar = () => {
     <SidebarContainer>
       <SidebarMenu>
         <li>
+        <Link to="search">
           <FaSearch /> 찾기
+        </Link>
         </li>
         <li>
-        <Link to="/movies">
+        <Link to="movies">
           <FaFilm /> 영화
         </Link>
         </li>

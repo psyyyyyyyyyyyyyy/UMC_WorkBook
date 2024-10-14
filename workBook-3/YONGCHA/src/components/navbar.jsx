@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 const NavbarContainer = styled.div`
   width: 100%;
@@ -22,7 +23,8 @@ const Logo = styled.div`
 `;
 
 const NavButtons = styled.div`
-    margin-left: 75%;
+  display: flex;
+  margin-left: 70%;
   button {
     background-color: #222;
     border: none;
@@ -42,10 +44,16 @@ const NavButtons = styled.div`
 const navbar = () => {
   return (
     <NavbarContainer>
+      <Link to="/">
       <Logo>YONGCHA</Logo>
+      </Link>
       <NavButtons>
-        <button>로그인</button>
-        <button>회원가입</button>
+        <Link to="login">
+          <button>로그인</button>
+        </Link>
+        <Link to="signup">
+          <button>회원가입</button>
+        </Link>
       </NavButtons>
     </NavbarContainer>
   );

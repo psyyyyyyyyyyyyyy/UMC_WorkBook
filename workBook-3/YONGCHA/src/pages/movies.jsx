@@ -1,71 +1,108 @@
-import React from 'react';
+import axios from 'axios';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-const MoviesContainer = styled.div`
-  padding: 20px;
-  background-color: #000;
-  color: white;
-  min-height: 100vh;
-  width: 100vw;
+const POSTER_URL = 'https://image.tmdb.org/t/p/w500';
+
+const MovieList = styled.div`
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  justify-content: center;
+  background-color: black;
+  gap: 10px;
 `;
 
-const CategoryTitle = styled.h1`
-  margin-bottom: 20px;
-`;
-
-const CategoryList = styled.div`
-  display: flex;
-  gap: 20px;
-`;
-
-const CategoryCard = styled.div`
-  width: 250px;
-  height: 140px;
-  background-color: #333;
+const MovieCard = styled.div`
+  background-color: black;
   border-radius: 10px;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
+  margin: 10px;
+  height: 65%;
+  width: 80%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+`;
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+const MoviePoster = styled.img`
+  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
 
-  &::before {
-    content: "${(props) => props.label}";
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 14px;
+  &:hover {
+    opacity: 1;
   }
 `;
 
-const MoviesPage = () => {
-  return (
-    <MoviesContainer>
-      <CategoryTitle>카테고리</CategoryTitle>
-      <CategoryList>
-        <CategoryCard label="현재 상영중인">
-          <img src="" alt="현재 상영중인" />
-        </CategoryCard>
-        <CategoryCard label="인기있는">
-          <img src="" alt="인기있는" />
-        </CategoryCard>
-        <CategoryCard label="높은 평가를 받은">
-          <img src="" alt="높은 평가를 받은" />
-        </CategoryCard>
-        <CategoryCard label="개봉 예정중인">
-          <img src="" alt="개봉 예정중인" />
-        </CategoryCard>
-      </CategoryList>
-    </MoviesContainer>
-  );
-};
+const MovieInfo = styled.div`
+  display: flex;
+  align-items: start;
+  flex-direction: column;
+`
 
-export default MoviesPage;
+const MovieTitle = styled.span`
+  font-size: 10px;
+  margin-top: 10px;
+  color: white;
+`;
+
+const MovieReleaseDate = styled.span`
+  font-size: 8px;
+  color: #888;
+  display: block;
+`;
+
+export default function Movies() {
+    const [movies, setMovies] = useState([]);
+    const { type } = useParams();
+    console.log(type);
+    
+    
+    useEffect(()=>{
+        let url = "";
+        switch (type) {
+          case "now-playing":
+            url = `https://api.themoviedb.org/3/movie/now_playing?language=ko-KR&page=1`;
+            break;
+          case "popular":
+            url = `https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=1`;
+            break;
+          case "top-rated":
+            url = `https://api.themoviedb.org/3/movie/top_rated?language=ko-KR&page=1`;
+            break;
+          case "up-coming":
+            url = `https://api.themoviedb.org/3/movie/upcoming?language=ko-KR&page=1`;
+            break;
+          default:
+            url = `https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=1`;
+        }
+      
+        axios.get(url, {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjNTNkYWIyMDkxMzI2Y2Y3NTkwNTAwYjQyODNkNjZkNyIsIm5iZiI6MTcyNjE0MTU3Ny42MDM2ODcsInN1YiI6IjY0MzVmY2Y2NjUxZmNmMDBkM2RhYzNmNCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cFPsPRHPidq2OnJ3U-3wHJYhnGajDFqUsM8XJ_a_0bw`
+          }
+        })
+        .then((res)=>{
+          console.log(res.data);
+          setMovies(res.data.results);
+        })
+        .catch(err => console.error(err));
+      }, [type])
+      
+  return (
+    <MovieList>
+      {movies&&movies.map(movie => (
+        <MovieCard key={movie.id}>
+          <MoviePoster src={`${POSTER_URL}${movie.poster_path}`} alt={movie.title} />
+          <MovieInfo>
+            <MovieTitle>{movie.title}</MovieTitle>
+            <MovieReleaseDate>{movie.release_date}</MovieReleaseDate>
+          </MovieInfo>
+        </MovieCard>
+      ))}
+    </MovieList>
+  );
+}
