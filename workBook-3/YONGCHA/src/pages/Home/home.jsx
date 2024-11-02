@@ -9,7 +9,7 @@ const HomeContainer = styled.div`
   width: 100vw;
 `;
 
-const HomePage = () => {
+const HomePage = () => { 
     return (
         <HomeContainer>
             <h1>Home Page 야호~!</h1>

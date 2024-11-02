@@ -2,20 +2,27 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 const MoviesContainer = styled.div`
-  padding: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 70px 230px;
   background-color: #000;
   color: white;
-  min-height: 100vh;
+  height: 100vh;
   width: 100vw;
+  overflow-y: auto;
 `;
 
 const CategoryTitle = styled.h1`
   margin-bottom: 20px;
+  margin-left: 80px;
 `;
 
 const CategoryList = styled.div`
   display: flex;
   gap: 20px;
+  justify-content: center;
+  width: 80%;
 `;
 
 const CategoryCard = styled.div`
@@ -61,7 +68,7 @@ const MoviesPage = () => {
       <CategoryTitle>카테고리</CategoryTitle>
       <CategoryList>
         {categories.map((category, index) => (
-          <CategoryCard onClick={() => navigate(`/movies/${category.type}`)} key={index} label={category.label}>
+          <CategoryCard onClick={() => navigate(`/movies/category/${category.type}`)} key={index} label={category.label}>
             <img src={category.image} alt={category.label} />
           </CategoryCard>
         ))}

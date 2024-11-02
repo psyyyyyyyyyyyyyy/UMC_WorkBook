@@ -2,13 +2,14 @@ import './App.css'
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import HomePage from "./pages/home.jsx";
+import HomePage from "./pages/Home/home.jsx";
 import NotFound from "./pages/not-found.jsx";
-import MoviesCategory from "./pages/moviesCategory.jsx";
-import Movies from './pages/movies.jsx';
-import Login from "./pages/login.jsx";
-import Signup from "./pages/signup.jsx";
-import Search from './pages/search.jsx';
+import MoviesCategory from "./pages/Movies/moviesCategory.jsx";
+import Movies from './pages/Movies/movies.jsx';
+import MovieDetail from './pages/Movies/movieDetail.jsx';
+import Login from "./pages/Login/login.jsx";
+import Signup from "./pages/Signup/signup.jsx";
+import Search from './pages/Search/search.jsx';
 import RootLayout from "./layout/root-layout.jsx";
 
 const router = createBrowserRouter([
@@ -29,8 +30,12 @@ const router = createBrowserRouter([
                 element: <MoviesCategory />,
             },
             {
-                path: 'movies/:type',
-                element: <Movies/>
+                path: 'movies/:movieId',
+                element: <MovieDetail />
+            },
+            {
+                path: 'movies/category/:type',
+                element: <Movies />
             },
             {
                 path: 'login',

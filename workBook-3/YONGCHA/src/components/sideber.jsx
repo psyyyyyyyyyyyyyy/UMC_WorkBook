@@ -12,6 +12,7 @@ const SidebarContainer = styled.div`
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 10;
 `;
 
 const SidebarMenu = styled.ul`
@@ -23,6 +24,7 @@ const SidebarMenu = styled.ul`
     cursor: pointer;
     display: flex;
     align-items: center;
+    color: white;
 
     &:hover {
       background-color: #444;
@@ -47,16 +49,16 @@ const sidebar = () => {
   return (
     <SidebarContainer>
       <SidebarMenu>
-        <li>
         <Link to="search">
-          <FaSearch /> 찾기
+          <li>
+            <FaSearch /> 찾기
+          </li>
         </Link>
-        </li>
-        <li>
         <Link to="movies">
-          <FaFilm /> 영화
+          <li>
+            <FaFilm /> 영화
+          </li>
         </Link>
-        </li>
       </SidebarMenu>
     </SidebarContainer>
   );
