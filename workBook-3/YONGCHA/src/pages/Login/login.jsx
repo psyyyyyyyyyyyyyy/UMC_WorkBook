@@ -1,21 +1,115 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 const LoginContainer = styled.div`
-  padding: 20px;
+  position: absolute;
+  top: 70px;
+  left: 200px;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background-color: #000;
   color: white;
-  min-height: 100vh;
-  width: 100vw;
+  overflow: hidden;
+`;
+
+const FormWrapper = styled.div`
+  width: 100%;
+  max-width: 400px;
+  background-color: #111;
+  border-radius: 8px;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+`;
+
+const ErrorMessage = styled.p`
+  color: red;
+  font-size: 12px;
+  margin: 0 0 10px 0;
+`;
+
+const SubmitButton = styled.input`
+  width: 100%;
+  padding: 10px;
+  background-color: ${(props) => (props.disabled ? '#666' : '#ff4b5c')};
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+  box-sizing: border-box;
+
+  &:hover {
+    background-color: ${(props) => (props.disabled ? '#666' : '#ff1f1f')};
+  }
 `;
 
 const LoginPage = () => {
+    const schema = yup.object().shape({
+        email: yup
+            .string()
+            .email('올바른 이메일 형식이 아닙니다! 다시 확인해주세요!')
+            .required('이메일을 입력해주세요!'),
+        password: yup
+            .string()
+            .min(8, '비밀번호는 8자 이상이어야 합니다!')
+            .max(16, '비밀번호는 16자 이하여야 합니다!')
+            .required('비밀번호를 입력해주세요!')
+    });
 
-    return(
+    const { register, handleSubmit, formState: { errors, isValid } } = useForm({
+        resolver: yupResolver(schema),
+        mode: "onChange"
+    });
+
+    const onSubmit = (data) => {
+        console.log('폼 데이터 제출');
+        console.log(data);
+    }
+
+    return (
         <LoginContainer>
-            <h1>로그인 페이지</h1>
+            <FormWrapper>
+                <Form onSubmit={handleSubmit(onSubmit)}>
+                    <Input 
+                        type='email' 
+                        {...register("email")} 
+                        placeholder="이메일을 입력하세요" 
+                    />
+                    {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
+                    
+                    <Input 
+                        type='password' 
+                        {...register("password")} 
+                        placeholder="비밀번호를 입력하세요" 
+                    />
+                    {errors.password && <ErrorMessage>{errors.password.message}</ErrorMessage>}
+                    
+                    <SubmitButton type='submit' value="로그인" disabled={!isValid} />
+                </Form>
+            </FormWrapper>
         </LoginContainer>
-    )
-}
+    );
+};
 
 export default LoginPage;
