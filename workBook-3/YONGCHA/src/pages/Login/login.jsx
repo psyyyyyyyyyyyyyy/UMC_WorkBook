@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useNavigate } from 'react-router-dom';
+
+const API_URL = import.meta.env.VITE_LOGIN_API_URL;
 
 const LoginContainer = styled.div`
   position: absolute;
@@ -65,51 +68,79 @@ const SubmitButton = styled.input`
 `;
 
 const LoginPage = () => {
-    const schema = yup.object().shape({
-        email: yup
-            .string()
-            .email('올바른 이메일 형식이 아닙니다! 다시 확인해주세요!')
-            .required('이메일을 입력해주세요!'),
-        password: yup
-            .string()
-            .min(8, '비밀번호는 8자 이상이어야 합니다!')
-            .max(16, '비밀번호는 16자 이하여야 합니다!')
-            .required('비밀번호를 입력해주세요!')
-    });
+  const navigate = useNavigate();
+  const schema = yup.object().shape({
+    email: yup
+      .string()
+      .email('올바른 이메일 형식이 아닙니다! 다시 확인해주세요!')
+      .required('이메일을 입력해주세요!'),
+    password: yup
+      .string()
+      .min(8, '비밀번호는 8자 이상이어야 합니다!')
+      .max(16, '비밀번호는 16자 이하여야 합니다!')
+      .required('비밀번호를 입력해주세요!')
+  });
 
-    const { register, handleSubmit, formState: { errors, isValid } } = useForm({
-        resolver: yupResolver(schema),
-        mode: "onChange"
-    });
+  const { register, handleSubmit, formState: { errors, isValid } } = useForm({
+    resolver: yupResolver(schema),
+    mode: "onChange"
+  });
 
-    const onSubmit = (data) => {
-        console.log('폼 데이터 제출');
-        console.log(data);
+  const onSubmit = async (data) => {
+    try {
+      const response = await fetch(`${API_URL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('로그인에 실패했습니다. 다시 시도해주세요.');
+      }
+
+      const result = await response.json();
+      console.log('로그인 성공:', result);
+
+      localStorage.setItem('accessToken', result.accessToken);
+      localStorage.setItem('refreshToken', result.refreshToken);
+      localStorage.setItem('email', data.email);
+      
+      navigate('/');
+    } catch (error) {
+      console.error('로그인 실패:', error.message);
+      alert(error.message);
     }
+  };
 
-    return (
-        <LoginContainer>
-            <FormWrapper>
-                <Form onSubmit={handleSubmit(onSubmit)}>
-                    <Input 
-                        type='email' 
-                        {...register("email")} 
-                        placeholder="이메일을 입력하세요" 
-                    />
-                    {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
-                    
-                    <Input 
-                        type='password' 
-                        {...register("password")} 
-                        placeholder="비밀번호를 입력하세요" 
-                    />
-                    {errors.password && <ErrorMessage>{errors.password.message}</ErrorMessage>}
-                    
-                    <SubmitButton type='submit' value="로그인" disabled={!isValid} />
-                </Form>
-            </FormWrapper>
-        </LoginContainer>
-    );
+
+  return (
+    <LoginContainer>
+      <FormWrapper>
+        <Form onSubmit={handleSubmit(onSubmit)}>
+          <Input
+            type='email'
+            {...register("email")}
+            placeholder="이메일을 입력하세요"
+          />
+          {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
+
+          <Input
+            type='password'
+            {...register("password")}
+            placeholder="비밀번호를 입력하세요"
+          />
+          {errors.password && <ErrorMessage>{errors.password.message}</ErrorMessage>}
+
+          <SubmitButton type='submit' value="로그인" disabled={!isValid} />
+        </Form>
+      </FormWrapper>
+    </LoginContainer>
+  );
 };
 
 export default LoginPage;

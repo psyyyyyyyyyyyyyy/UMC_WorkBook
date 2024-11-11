@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
+// 스타일 정의
 const NavbarContainer = styled.div`
   width: 100%;
   height: 70px;
@@ -34,29 +35,60 @@ const NavButtons = styled.div`
     margin-right: 10px;
     cursor: pointer;
     border-radius: 5px;
-    
+
     &:hover {
       background-color: #ff4b5c;
     }
   }
+  span {
+    color: white;
+    margin-right: 20px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 `;
 
-const navbar = () => {
+const Navbar = () => {
+  const navigate = useNavigate();
+  
+  const accessToken = localStorage.getItem('accessToken');
+  const email = localStorage.getItem('email');
+  const username = email ? email.split('@')[0] : '';
+
+
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('email');
+    navigate('/login');
+  };
+
   return (
     <NavbarContainer>
       <Link to="/">
-      <Logo>YONGCHA</Logo>
+        <Logo>YONGCHA</Logo>
       </Link>
       <NavButtons>
-        <Link to="login">
-          <button>로그인</button>
-        </Link>
-        <Link to="signup">
-          <button>회원가입</button>
-        </Link>
+        {accessToken ? (
+          <>
+            <span>{username}님 반갑습니다</span>
+            <button onClick={handleLogout}>로그아웃</button>
+          </>
+        ) : (
+          <>
+            <Link to="login">
+              <button>로그인</button>
+            </Link>
+            <Link to="signup">
+              <button>회원가입</button>
+            </Link>
+          </>
+        )}
       </NavButtons>
     </NavbarContainer>
   );
 };
 
-export default navbar;
+export default Navbar;

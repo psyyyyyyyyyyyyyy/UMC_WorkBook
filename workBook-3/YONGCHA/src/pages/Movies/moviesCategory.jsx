@@ -5,11 +5,11 @@ const MoviesContainer = styled.div`
   position: fixed;
   top: 0;
   left: 0;
-  padding: 70px 230px;
+  padding: 70px 200px;
   background-color: #000;
   color: white;
   height: 100vh;
-  width: 100vw;
+  width: calc(100vw - 200px);
   overflow-y: auto;
 `;
 
@@ -22,7 +22,7 @@ const CategoryList = styled.div`
   display: flex;
   gap: 20px;
   justify-content: center;
-  width: 80%;
+  width: 100%;
 `;
 
 const CategoryCard = styled.div`
