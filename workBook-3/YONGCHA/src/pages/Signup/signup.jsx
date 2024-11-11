@@ -1,8 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+
+const API_URL = import.meta.env.VITE_REGISTER_API_URL;
 
 const SignupContainer = styled.div`
   position: absolute;
@@ -65,6 +68,8 @@ const SubmitButton = styled.input`
 `;
 
 const SignupPage = () => {
+    const navigate = useNavigate();
+
     const schema = yup.object().shape({
         email: yup
             .string()
@@ -86,9 +91,32 @@ const SignupPage = () => {
         mode: "onChange"
     });
 
-    const onSubmit = (data) => {
-        console.log('회원가입 데이터 제출');
-        console.log(data);
+    const onSubmit = async (data) => {
+        try {
+            const response = await fetch(`${API_URL}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: data.email,
+                    password: data.password,
+                    passwordCheck: data.passwordCheck
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('회원가입에 실패했습니다. 다시 시도해주세요.');
+            }
+
+            const result = await response.json();
+            console.log('회원가입 성공:', result);
+            
+            navigate('/login');
+        } catch (error) {
+            console.error('회원가입 실패:', error.message);
+            alert(error.message);
+        }
     }
 
     return (
