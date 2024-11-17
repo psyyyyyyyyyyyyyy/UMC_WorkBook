@@ -1,6 +1,8 @@
 import { useParams } from 'react-router-dom';
 import useCustomFetch from '../hooks/useCustomFetch';
+import { useQuery } from '@tanstack/react-query';
 import styled from 'styled-components';
+import { useGetMovieCredit } from '../hooks/queries/useGetMovieCredit';
 
 const Title = styled.p`
     font-size: 30px;
@@ -16,7 +18,7 @@ const CreditsContainer = styled.div`
 
 const CastGrid = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));  /* 최소 120px로 여러 열 구성 */
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); 
     gap: 20px;
     padding: 20px;
 `;
@@ -48,7 +50,12 @@ const DEFAULT_PROFILE_IMAGE = 'https://i.pinimg.com/564x/82/29/84/82298438674c72
 
 const MovieCredits = () => {
     const { movieId } = useParams();
-    const { data, isLoading, isError } = useCustomFetch(`/movie/${movieId}/credits?language=ko-KR`);
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ['movieCredit', movieId],
+        queryFn: () => useGetMovieCredit({ movieId }),
+        gcTime: 10000,
+        staleTime: 10000,
+    });
 
     if (isLoading) return <div>Loading...</div>;
     if (isError || !data) return <div>Error loading credits.</div>;
@@ -59,7 +66,7 @@ const MovieCredits = () => {
         <CreditsContainer>
             <Title>출연진</Title>
             <CastGrid>
-                {castList.map((castMember) => (
+                {castList?.map((castMember) => (
                     <CastCard key={castMember.id}>
                         <ProfileImage 
                             src={castMember.profile_path 

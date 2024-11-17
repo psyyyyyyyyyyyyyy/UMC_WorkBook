@@ -11,6 +11,8 @@ import Login from "./pages/Login/login.jsx";
 import Signup from "./pages/Signup/signup.jsx";
 import Search from './pages/Search/search.jsx';
 import RootLayout from "./layout/root-layout.jsx";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const router = createBrowserRouter([
     {
@@ -49,17 +51,20 @@ const router = createBrowserRouter([
                 path: 'search',
                 element: <Search />
             },
-            {
-                path: 'signup',
-                element: <Signup />
-            }
         ]
     },
 
 ])
 
+const queryClient = new QueryClient()
+
 function App() {
-    return <RouterProvider router={router} />
+    return (
+    <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+    )
 }
 
 export default App
