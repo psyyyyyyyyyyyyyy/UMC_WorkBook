@@ -1,7 +1,10 @@
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import useCustomFetch from '../../hooks/useCustomFetch';
-import { Link } from 'react-router-dom';
+import CardListSkeleton from '../../components/Skeleton/card-list-skeleton';
+import { useGetInfiniteMovies } from '../../hooks/useGetInfiniteMovies';
+import { useInView } from "react-intersection-observer";
+import { useEffect } from 'react';
+import ClipLoader from "react-spinners/CircleLoader";
 
 const POSTER_URL = 'https://image.tmdb.org/t/p/w500';
 
@@ -57,41 +60,73 @@ const MovieReleaseDate = styled.span`
 export default function Movies() {
   const { type } = useParams();
 
-  const getUrl = (type) => {
+  const getCategory = (type) => {
     switch (type) {
-      case "now-playing":
-        return `/movie/now_playing?language=ko-KR&page=1`;
-      case "popular":
-        return `/movie/popular?language=ko-KR&page=1`;
-      case "top-rated":
-        return `/movie/top_rated?language=ko-KR&page=1`;
-      case "up-coming":
-        return `/movie/upcoming?language=ko-KR&page=1`;
+      case 'now-playing':
+        return 'now_playing';
+      case 'popular':
+        return 'popular';
+      case 'top-rated':
+        return 'top_rated';
+      case 'up-coming':
+        return 'upcoming';
       default:
-        return `/movie/popular?language=ko-KR&page=1`;
+        return 'popular';
     }
   };
 
-  const { data: movies, isLoading, isError } = useCustomFetch(getUrl(type));
+  const {
+    data: movies,
+    isFetching,
+    hasNextPage,
+    isPending,
+    fetchNextPage,
+    isFetchingNextPage,
+    isError
+  } = useGetInfiniteMovies(getCategory(type));
 
-  if (isLoading) return <p>Loading...</p>;
+  const { ref, inView } = useInView({
+    threshold: 0,
+  })
+
+  useEffect(() => {
+    if (inView) {
+      !isFetching && hasNextPage && fetchNextPage();
+    }
+  }, [inView, isFetching, hasNextPage, fetchNextPage]);
+
+  // if (isPending) {
+  //   return (
+  //     <MovieList>
+  //       <CardListSkeleton number={20} />
+  //     </MovieList>
+  //   );
+  // }
+
   if (isError) return <p>Error loading movies.</p>;
 
-  return (
-    <MovieList>
-
-      {movies.results && movies.results.map(movie => (
-        <MovieCard key={movie.id}>
-          <Link to={`/movies/${movie.id}`}>
-            <MoviePoster src={`${POSTER_URL}${movie.poster_path}`} alt={movie.title} />
-            <MovieInfo>
-              <MovieTitle>{movie.title}</MovieTitle>
-              <MovieReleaseDate>{movie.release_date}</MovieReleaseDate>
-            </MovieInfo>
-          </Link>
-        </MovieCard>
-      ))}
-
-    </MovieList>
+  const renderMovieCard = (movie) => (
+    <MovieCard key={movie.id}>
+      <Link to={`/movies/${movie.id}`}>
+        <MoviePoster src={`${POSTER_URL}${movie.poster_path}`} alt={movie.title} />
+        <MovieInfo>
+          <MovieTitle>{movie.title}</MovieTitle>
+          <MovieReleaseDate>{movie.release_date}</MovieReleaseDate>
+        </MovieInfo>
+      </Link>
+    </MovieCard>
   );
+
+  return (
+    <>
+      <MovieList>
+        {movies?.pages.flatMap(page => page.results.map(renderMovieCard))}
+        {isPending && <CardListSkeleton number={20}/>}
+        <div ref={ref} style={{ marginTop: '50px', display: 'flex', justifyContent: 'center', width: '100%' }}>
+        {isFetching && <ClipLoader color={'#fff'} />}
+      </div>
+      </MovieList>
+    </>
+  );
+
 }

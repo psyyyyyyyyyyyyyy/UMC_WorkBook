@@ -1,14 +1,16 @@
 import { useParams } from 'react-router-dom';
-import useCustomFetch from '../../hooks/useCustomFetch';
+import { useQuery } from '@tanstack/react-query';
 import styled from 'styled-components';
 import MovieCredits from '../../components/movieCredits.jsx';
+import { useGetMoviesDetail } from '../../hooks/queries/useGetMoviesDetail';
+
 
 const MovieContainer = styled.div`
     position: relative;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
     background: ${({ backdropPath }) =>
         backdropPath
             ? `linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.2)), url('https://image.tmdb.org/t/p/original${backdropPath}')`
@@ -18,7 +20,7 @@ const MovieContainer = styled.div`
     background-repeat: no-repeat;
     color: white;
     min-height: 100vh;
-    width: 100%;
+    width: calc(100vw - 200px);
     overflow-y: auto;
 `;
 
@@ -67,13 +69,18 @@ const MovieDescription = styled.p`
 
 const MovieDetail = () => {
     const { movieId } = useParams();
-    const { data: movie, isLoading, isError } = useCustomFetch(`/movie/${movieId}?language=ko-KR`);
+    const { data: movie, isLoading, isError } = useQuery({
+        queryKey: ['movieDetail', movieId],
+        queryFn: () => useGetMoviesDetail({ movieId }),
+        gcTime: 10000,
+        staleTime: 10000,
+    });
 
     if (isLoading) return <div>Loading...</div>;
     if (isError || !movie) return <div>Error loading movie details.</div>;
 
     return (
-        <MovieContainer backdropPath={movie.backdrop_path}>
+        <MovieContainer data-backdrop-path={movie.backdrop_path}>
             <MovieInfo>
                 <MoviePoster src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title} />
                 <MovieDetails>
