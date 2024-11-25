@@ -1,82 +1,83 @@
-import { useContext } from 'react';
-import './App.css';
-import styles from './todoList.module.css';
-import { TodoContext } from './context/TodoContext';
+import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { getTodoList, postTodo, patchTodo, deleteTodo } from "./apis/todo";
+import TodoForm from "./components/todoForm";
+import TodoList from "./components/TodoList";
+import TodoDetail from "./components/todoDetail";
+import { queryClient } from "./main";
+import styles from "./todoList.module.css";
 
-// Input 컴포넌트
-function Input({ value, onChange }) {
-  return (
-    <input
-      className={styles.input}
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
-  );
-}
+const App = () => {
+  const [search, setSearch] = useState("");
 
-// Button 컴포넌트
-function Button({ onClick, children, type = "button" }) {
-  return (
-    <button onClick={onClick} type={type} className={styles.button}>
-      {children}
-    </button>
-  );
-}
+  const { data: todos, isLoading, isError } = useQuery({
+    queryFn: () => getTodoList({ title: search }),
+    queryKey: ["todos", search],
+  });
 
-function App() {
-  const {
-    todos,
-    text,
-    setText,
-    editingId,
-    setEditingId,
-    editText,
-    setEditText,
-    handleSubmit,
-    addTodo,
-    deleteTodo,
-    updateTodo,
-  } = useContext(TodoContext);
+  const { mutate: postTodoMutation } = useMutation({
+    mutationFn: postTodo,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["todos"]);
+    },
+  });
+
+  const { mutate: patchTodoMutation } = useMutation({
+    mutationFn: patchTodo,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["todos"]);
+    },
+  });
+
+  const { mutate: deleteTodoMutation } = useMutation({
+    mutationFn: deleteTodo,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["todos"]);
+    },
+  });
 
   return (
-    <div className={styles.container}>
-      <form onSubmit={handleSubmit}>
-        <Input value={text} onChange={setText} />
-        <Button onClick={addTodo} type="submit">
-          할 일 등록
-        </Button>
-      </form>
-      <div>
-        {todos.map((todo) => (
-          <div key={todo.id} className={styles.todoItem}>
-            {editingId !== todo.id && (
-              <div className={styles.todoTask}>
-                <p>{todo.task}</p>
-              </div>
-            )}
-            {editingId === todo.id && (
-              <Input value={editText} onChange={setEditText} />
-            )}
-            <div className={styles.todoActions}>
-              <Button onClick={() => deleteTodo(todo.id)} className={styles.buttonDelete}>
-                삭제하기
-              </Button>
-              {editingId === todo.id ? (
-                <Button onClick={() => updateTodo(editingId, editText)}>
-                  수정 완료
-                </Button>
-              ) : (
-                <Button onClick={() => setEditingId(todo.id)}>
-                  수정 진행
-                </Button>
-              )}
-            </div>
-          </div>
-        ))}
+    <Router>
+      <div className={styles.container}>
+        <h1>검색</h1>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className={styles.input}
+        />
+        <TodoForm postTodoMutation={postTodoMutation} />
+        {isLoading ? (
+          <div className={styles.loading}>로딩 중입니다...</div>
+        ) : isError ? (
+          <div className={styles.error}>에러가 발생했습니다.</div>
+        ) : (
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <TodoList
+                  todos={todos[0]}
+                  patchTodoMutation={patchTodoMutation}
+                  deleteTodoMutation={deleteTodoMutation}
+                />
+              }
+            />
+            <Route
+              path="/todo/:id"
+              element={
+                <TodoDetail
+                  patchTodoMutation={patchTodoMutation}
+                  deleteTodoMutation={deleteTodoMutation}
+                />
+              }
+            />
+          </Routes>
+        )}
       </div>
-    </div>
+    </Router>
   );
-}
+};
 
 export default App;
