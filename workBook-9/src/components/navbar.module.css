@@ -1,0 +1,45 @@
+.nav_center {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: rgb(25, 114, 231);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: calc(100vw - 17px);
+  }
+  
+  .nav_container {
+    display: flex;
+    align-items: center;
+    width: 4%;
+    color: #fff;
+  }
+  
+  .amount_container {
+    position: relative;
+    width: 30px;
+    height: 25px;
+    border-radius: 50%;
+    background-color: #9994da;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -18px;
+    margin-top: -10px;
+  }
+  
+  .total_amount {
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  h3 {
+    font-size: 30px;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+  }
+  
